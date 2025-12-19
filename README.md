@@ -114,6 +114,54 @@ For our current release process, visit [tika-docker Release Process](https://cwi
 ## Authors
 
 Apache Tika Dev Team (dev@tika.apache.org)
+
+## Building from Development Branches
+
+For testing unreleased features or development branches, you can build Docker images directly from source:
+
+### Building with Ignite ConfigStore Support
+
+```bash
+./build-from-branch.sh -b TIKA-4583-ignite-config-store -i -t ignite-test
+```
+
+This will:
+1. Clone the specified branch from the Apache Tika repository
+2. Build tika-grpc and tika-ignite-config-store
+3. Create a Docker image with both components
+4. Run basic tests to verify the image works
+
+### Build Script Options
+
+```bash
+./build-from-branch.sh [OPTIONS]
+
+Options:
+  -b BRANCH       Git branch or tag to build from (default: main)
+  -r REPO         Git repository URL (default: https://github.com/apache/tika.git)
+  -t TAG          Docker image tag (default: branch-name)
+  -i              Include Ignite ConfigStore plugin
+  -p              Push to Docker registry after building
+  -h              Display help message
+```
+
+### Examples
+
+Build from a specific branch:
+```bash
+./build-from-branch.sh -b TIKA-4583-ignite-config-store -i
+```
+
+Build from a fork and push:
+```bash
+./build-from-branch.sh \
+  -r https://github.com/yourusername/tika.git \
+  -b my-feature \
+  -t myregistry/tika-grpc:my-feature \
+  -p
+```
+
+See [sample-configs/ignite/README.md](sample-configs/ignite/README.md) for detailed instructions on running clustered deployments with Ignite.
    
 ## Contributors
 
