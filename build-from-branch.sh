@@ -110,8 +110,8 @@ if [ "$INCLUDE_IGNITE" = true ]; then
   DOCKERFILE="full/Dockerfile.ignite"
   echo "Using Dockerfile with Ignite ConfigStore support: $DOCKERFILE"
 else
-  DOCKERFILE="full/Dockerfile"
-  echo "Using standard Dockerfile: $DOCKERFILE"
+  DOCKERFILE="full/Dockerfile.source"
+  echo "Using source-build Dockerfile: $DOCKERFILE"
 fi
 
 # Check if Dockerfile exists

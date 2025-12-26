@@ -23,9 +23,9 @@
 ## This builds images from GPG-signed Apache release artifacts.
 ##
 
-# tika-grpc was first released in Tika 3.0.0
-# Initial 3.x releases
-for version in 3.0.0; do
+# tika-grpc was first released in Tika 4.0.0
+# Initial 4.x releases
+for version in 4.0.0; do
     echo "Building and publishing apache/tika-grpc:${version}"
     ./docker-tool.sh build "${version}" "${version}"
     ./docker-tool.sh test "${version}"
