@@ -67,16 +67,20 @@ RUN set -eux \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Create writable cache directory for plugin extraction
+RUN mkdir -p /var/cache/tika/plugins && \
+    chown -R $UID_GID /var/cache/tika
+
 # Copy the built JAR from builder stage
 COPY --from=builder /artifacts/tika-grpc.jar /tika-grpc.jar
 
-# Copy plugins to read-only location
-COPY --from=builder /artifacts/plugins/*.zip /opt/tika-plugins/
+# Copy plugins to cache directory (writable by user 35002:35002)
+COPY --from=builder /artifacts/plugins/*.zip /var/cache/tika/plugins/
+RUN chown -R $UID_GID /var/cache/tika/plugins
 
-# Create writable plugin directory and copy zips there at runtime
 USER $UID_GID
 
 EXPOSE 50052
-ENTRYPOINT [ "/bin/sh", "-c", "mkdir -p /tmp/tika-plugins && cp /opt/tika-plugins/*.zip /tmp/tika-plugins/ && exec java --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer --plugin-roots /tmp/tika-plugins \"$@\"", "--"]
+ENTRYPOINT [ "/bin/sh", "-c", "exec java --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer --plugin-roots /var/cache/tika/plugins \"$@\"", "--"]
 
 LABEL maintainer="Apache Tika Developers dev@tika.apache.org"
