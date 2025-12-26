@@ -11,6 +11,16 @@
 # the License.
 
 # "random" uid/gid hopefully not used anywhere else
+
+# ============================================================================
+# NOTE: This Dockerfile requires an official Apache Tika release with
+#       tika-server-grpc JAR published to Apache distribution mirrors.
+#       
+#       tika-server-grpc will first be available in Tika 4.0.0.
+#       
+#       Until then, use build-from-branch.sh to build from source:
+#         ./build-from-branch.sh -b main
+# ============================================================================
 # This needs to be set globally and then referenced in
 # the subsequent stages -- see TIKA-3912
 ARG UID_GID="35002:35002"
@@ -74,7 +84,7 @@ COPY --from=fetch_tika /tika-server-grpc-${TIKA_VERSION}.jar /tika-server-grpc-$
 USER $UID_GID
 
 EXPOSE 50052
-ENTRYPOINT [ "/bin/sh", "-c", "exec java -cp \"/tika-server-grpc-${TIKA_VERSION}.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer $0 $@"]
+ENTRYPOINT [ "/bin/sh", "-c", "exec java -cp \"/tika-server-grpc-${TIKA_VERSION}.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer \"$@\"", "--"]
 
 LABEL maintainer="Apache Tika Developers dev@tika.apache.org"
 

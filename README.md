@@ -1,8 +1,10 @@
 # tika-grpc-docker
 
-This repo is used to create convenience Docker images for Apache Tika Grpc Server published as [apache/tika-grpc](https://hub.docker.com/r/apache/tika-grpc) on DockerHub by the [Apache Tika](http://tika.apache.org) Dev team
+> **⚠️ PRE-RELEASE STATUS:** Apache Tika gRPC Server is currently in development and has not been officially released yet. It will first be available in **Tika 4.0.0**. Until then, Docker images must be built from source code (see "Building from Development Branches" below).
 
-The images create a functional Apache Tika Grpc Server instance that contains the latest Ubuntu running the appropriate version's server on Port 50052 using Java 17 LTS.
+This repo is used to create convenience Docker images for Apache Tika Grpc Server published as [apache/tika-grpc](https://hub.docker.com/r/apache/tika-grpc) on DockerHub by the [Apache Tika](http://tika.apache.org) Dev team.
+
+Once Tika 4.0.0 is released, the images will create a functional Apache Tika Grpc Server instance that contains the latest Ubuntu running the appropriate version's server on Port 50052 using Java 17 LTS.
 
 There is a minimal version, which contains only Apache Tika and it's core dependencies, and a full version, which also includes dependencies for the GDAL and Tesseract OCR parsers. To balance showing functionality versus the size of the full image, this file currently installs the language packs for the following languages:
 * English
@@ -89,13 +91,61 @@ You can install docker-compose from [here](https://docs.docker.com/compose/insta
 
 ## Building
 
-To build the image from scratch, simply invoke:
+### Current Build Method - Building from Development Branches (Pre-Release)
 
-    docker build -t 'apache/tika-grpc' github.com/apache/tika-grpc-docker
-   
-You can then use the following command (using the name you allocated in the build command as part of -t option):
+**Since tika-grpc has not been officially released yet**, you must build from source code using the `build-from-branch.sh` script:
 
-    docker run -d -p 127.0.0.1:50052:50052 apache/tika-grpc
+```bash
+# Build from main branch (recommended for latest development)
+./build-from-branch.sh -b main
+
+# Build from a specific feature branch
+./build-from-branch.sh -b TIKA-4578
+
+# Build with Ignite ConfigStore support
+./build-from-branch.sh -b main -i
+```
+
+This will:
+1. Clone the Apache Tika repository
+2. Build tika-grpc and all dependencies from source
+3. Create a Docker image with the compiled JAR
+4. Run basic tests to verify the image works
+5. Tag as `apache/tika-grpc:<branch-name>`
+
+**Running your built image:**
+
+```bash
+docker run -d -p 127.0.0.1:50052:50052 apache/tika-grpc:main
+```
+
+See the "Building from Development Branches" section below for complete documentation and options.
+
+### Future Build Method - Building from Official Apache Releases (Post-4.0.0)
+
+**Once Tika 4.0.0 is officially released**, you'll be able to build Docker images from GPG-signed Apache release artifacts using `docker-tool.sh`:
+
+```bash
+# Build from signed release (future - requires Tika 4.0.0+)
+./docker-tool.sh build 4.0.0 4.0.0
+./docker-tool.sh test 4.0.0
+./docker-tool.sh publish 4.0.0 4.0.0
+```
+
+This will:
+1. Download the signed `tika-server-grpc-4.0.0.jar` from Apache distribution mirrors
+2. Download and verify the GPG signature (`.asc` file)
+3. Import Apache KEYS and verify the JAR is properly signed
+4. Build both minimal and full Docker images
+
+**Manual build from release (future):**
+
+```bash
+docker build -t apache/tika-grpc:4.0.0 --build-arg TIKA_VERSION=4.0.0 - < minimal/Dockerfile
+docker build -t apache/tika-grpc:4.0.0-full --build-arg TIKA_VERSION=4.0.0 - < full/Dockerfile
+```
+
+> **Note:** The `minimal/` and `full/` Dockerfiles are prepared for future releases and will NOT work until tika-server-grpc-4.0.0.jar is published to Apache distribution mirrors.
     
 ## More Information
 
@@ -184,6 +234,29 @@ There have been a range of [contributors](https://github.com/apache/tika-grpc-do
    See the License for the specific language governing permissions and
    limitations under the License.
  
+## Release Process and GPG Verification
+
+### Official Release Images
+
+Official release images are built using GPG-signed Apache release artifacts. The Dockerfiles in this repository:
+
+1. Download the `tika-server-grpc-${VERSION}.jar` from Apache distribution mirrors
+2. Download the corresponding `.asc` GPG signature file
+3. Import the Apache Tika KEYS file
+4. Verify the GPG signature before using the JAR in the Docker image
+
+This ensures that the Docker images contain only verified, officially released Apache Tika artifacts.
+
+### Development/Testing Images
+
+The `build-from-branch.sh` script allows building Docker images from source code for testing purposes. These builds:
+- Compile from Git source code
+- Do NOT use GPG-signed releases
+- Are intended for development and testing only
+- Should NOT be used in production
+
+For production use, always build from official Apache releases using the standard Dockerfiles and `docker-tool.sh`.
+
 ## Disclaimer
 
 It is worth noting that whilst these Docker images download the binary JARs published by the Apache Tika Team on the Apache Software Foundation distribution sites, only the source release of an Apache Software Foundation project is an official release artefact. See [Release Distribution Policy](https://www.apache.org/dev/release-distribution.html) for more details.
