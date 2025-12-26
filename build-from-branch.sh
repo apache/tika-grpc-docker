@@ -34,13 +34,12 @@ print_usage() {
   echo "  -b BRANCH       Git branch or tag to build from (default: main)"
   echo "  -r REPO         Git repository URL (default: https://github.com/apache/tika.git)"
   echo "  -t TAG          Docker image tag (default: branch-name)"
-  echo "  -i              Include Ignite ConfigStore plugin"
   echo "  -p              Push to Docker registry after building"
   echo "  -h              Display this help message"
   echo ""
   echo "Examples:"
-  echo "  # Build from TIKA-4583 branch with Ignite support"
-  echo "  $0 -b TIKA-4583-ignite-config-store -i"
+  echo "  # Build from TIKA-4578 branch"
+  echo "  $0 -b TIKA-4578"
   echo ""
   echo "  # Build from fork and push to registry"
   echo "  $0 -r https://github.com/user/tika.git -b feature-branch -t myimage:latest -p"
@@ -50,11 +49,10 @@ print_usage() {
 BRANCH="main"
 REPO="https://github.com/apache/tika.git"
 TAG=""
-INCLUDE_IGNITE=false
 PUSH=false
 
 # Parse command line arguments
-while getopts ":b:r:t:iph" opt; do
+while getopts ":b:r:t:ph" opt; do
   case ${opt} in
     b )
       BRANCH=$OPTARG
@@ -65,9 +63,6 @@ while getopts ":b:r:t:iph" opt; do
     t )
       TAG=$OPTARG
       ;;
-    i )
-      INCLUDE_IGNITE=true
-      ;;
     p )
       PUSH=true
       ;;
@@ -75,11 +70,11 @@ while getopts ":b:r:t:iph" opt; do
       print_usage
       exit 0
       ;;
-    \? )
-      echo "Invalid Option: -$OPTARG" 1>&2
-      print_usage
-      exit 1
-      ;;
+   \? )
+     echo "Invalid Option: -$OPTARG" 1>&2
+     print_usage
+     exit 1
+     ;;
     : )
       echo "Invalid Option: -$OPTARG requires an argument" 1>&2
       print_usage
@@ -101,18 +96,11 @@ echo "==========================================================================
 echo "Repository: $REPO"
 echo "Branch:     $BRANCH"
 echo "Tag:        apache/tika-grpc:$TAG"
-echo "Ignite:     $INCLUDE_IGNITE"
 echo "Push:       $PUSH"
 echo "====================================================================================================="
 
-# Choose Dockerfile based on Ignite flag
-if [ "$INCLUDE_IGNITE" = true ]; then
-  DOCKERFILE="full/Dockerfile.ignite"
-  echo "Using Dockerfile with Ignite ConfigStore support: $DOCKERFILE"
-else
-  DOCKERFILE="full/Dockerfile.source"
-  echo "Using source-build Dockerfile: $DOCKERFILE"
-fi
+DOCKERFILE="full/Dockerfile.source"
+echo "Using source-build Dockerfile: $DOCKERFILE"
 
 # Check if Dockerfile exists
 if [ ! -f "$DOCKERFILE" ]; then
@@ -182,10 +170,5 @@ echo "Done! Image ready: apache/tika-grpc:$TAG"
 echo "====================================================================================================="
 echo ""
 echo "To run the container:"
-echo "  docker run -p 50052:50052 apache/tika-grpc:$TAG"
+echo "  docker run -p 50052:50052 -v \$(pwd)/tika-config.xml:/config/tika-config.xml apache/tika-grpc:$TAG -c /config/tika-config.xml"
 echo ""
-if [ "$INCLUDE_IGNITE" = true ]; then
-  echo "To run with Ignite configuration:"
-  echo "  docker run -p 50052:50052 -v \$(pwd)/tika-config.json:/config/tika-config.json apache/tika-grpc:$TAG -c /config/tika-config.json"
-  echo ""
-fi
