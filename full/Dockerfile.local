@@ -54,6 +54,6 @@ COPY plugins/*.zip /opt/tika-plugins/
 USER $UID_GID
 
 EXPOSE 50052
-ENTRYPOINT [ "/bin/sh", "-c", "mkdir -p /tmp/tika-plugins && cp /opt/tika-plugins/*.zip /tmp/tika-plugins/ && exec java -Dtika.plugin.dir=/tmp/tika-plugins -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer \"$@\"", "--"]
+ENTRYPOINT [ "/bin/sh", "-c", "mkdir -p /tmp/tika-plugins && cp /opt/tika-plugins/*.zip /tmp/tika-plugins/ && exec java -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer --plugin-roots /tmp/tika-plugins \"$@\"", "--"]
 
 LABEL maintainer="Apache Tika Developers dev@tika.apache.org"
