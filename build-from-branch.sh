@@ -179,35 +179,44 @@ echo "==========================================================================
 echo ""
 echo "Testing the image..."
 CONTAINER_NAME="tika-test-$$"
-docker run -d --name "$CONTAINER_NAME" -p 127.0.0.1:50052:50052 "apache/tika-grpc:$TAG" || die "Failed to start container"
 
-# Wait for container to start
-echo "Waiting for container to start..."
-sleep 10
-
-# Check if container is running
-if docker ps | grep -q "$CONTAINER_NAME"; then
-  echo "$(tput setaf 2)✓ Container started successfully$(tput sgr0)"
+# Use the simple config for testing
+TEST_CONFIG="$(pwd)/sample-configs/test-simple.json"
+if [ ! -f "$TEST_CONFIG" ]; then
+  echo "Warning: Test config not found at $TEST_CONFIG, skipping container test"
 else
-  echo "$(tput setaf 1)✗ Container failed to start$(tput sgr0)"
-  docker logs "$CONTAINER_NAME"
-  docker rm -f "$CONTAINER_NAME" 2>/dev/null
-  exit 1
-fi
+  docker run -d --name "$CONTAINER_NAME" -p 127.0.0.1:50052:50052 \
+    -v "$TEST_CONFIG:/config/tika-config.json:ro" \
+    "apache/tika-grpc:$TAG" -c /config/tika-config.json || die "Failed to start container"
 
-# Verify user
-USER=$(docker inspect "$CONTAINER_NAME" --format '{{.Config.User}}')
-if [ "$USER" = "35002:35002" ]; then
-  echo "$(tput setaf 2)✓ User configuration correct: $USER$(tput sgr0)"
-else
-  echo "$(tput setaf 1)✗ User configuration incorrect: $USER (expected 35002:35002)$(tput sgr0)"
-  docker rm -f "$CONTAINER_NAME" 2>/dev/null
-  exit 1
-fi
+  # Wait for container to start
+  echo "Waiting for container to start..."
+  sleep 10
 
-# Clean up test container
-docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1
-echo "$(tput setaf 2)✓ Tests passed$(tput sgr0)"
+  # Check if container is running
+  if docker ps | grep -q "$CONTAINER_NAME"; then
+    echo "$(tput setaf 2)✓ Container started successfully$(tput sgr0)"
+  else
+    echo "$(tput setaf 1)✗ Container failed to start$(tput sgr0)"
+    docker logs "$CONTAINER_NAME"
+    docker rm -f "$CONTAINER_NAME" 2>/dev/null
+    exit 1
+  fi
+
+  # Verify user
+  USER=$(docker inspect "$CONTAINER_NAME" --format '{{.Config.User}}')
+  if [ "$USER" = "35002:35002" ]; then
+    echo "$(tput setaf 2)✓ User configuration correct: $USER$(tput sgr0)"
+  else
+    echo "$(tput setaf 1)✗ User configuration incorrect: $USER (expected 35002:35002)$(tput sgr0)"
+    docker rm -f "$CONTAINER_NAME" 2>/dev/null
+    exit 1
+  fi
+
+  # Clean up test container
+  docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1
+  echo "$(tput setaf 2)✓ Tests passed$(tput sgr0)"
+fi
 
 # Push if requested
 if [ "$PUSH" = true ]; then
