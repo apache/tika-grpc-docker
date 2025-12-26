@@ -18,8 +18,8 @@ To install more languages simply update the apt-get command to include the packa
 ## Available Tags
 
 Below are the most recent 2.x series tags:
-- `latest`, `3.0.0`: Apache Tika Server 3.0.0 (Minimal)
-- `latest-full`, `3.0.0-full`: Apache Tika Server 3.0.0 (Full)
+- `latest`, `4.0.0`: Apache Tika Server 4.0.0 (Minimal)
+- `latest-full`, `4.0.0-full`: Apache Tika Server 4.0.0 (Full)
 
 You can see a full set of tags for historical versions [here](https://hub.docker.com/r/apache/tika-grpc/tags?page=1&ordering=last_updated).
 
@@ -35,7 +35,7 @@ Then to run the container, execute the following command:
 
     docker run -d -p 127.0.0.1:50052:50052 apache/tika-grpc:<tag>
 
-Where <tag> is the DockerHub tag corresponding to the Apache Tika Server version - e.g. 3.0.0, 3.0.0-full.
+Where <tag> is the DockerHub tag corresponding to the Apache Tika Server version - e.g. 4.0.0, 4.0.0-full.
 
 NOTE: The latest and latest-full tags are explicitly set to the latest released version when they are published.
 
@@ -47,7 +47,7 @@ you can simply run:
 
 ### Custom Config
 
-From version 3.0.0, 3.0.0-full of the image it is now easier to override the defaults and pass parameters to the running instance.
+From version 4.0.0, 4.0.0-full of the image it is now easier to override the defaults and pass parameters to the running instance.
 
 So for example if you wish to disable the OCR parser in the full image you could write a custom configuration:
 
@@ -65,7 +65,7 @@ EOT
 ```
 Then by mounting this custom configuration as a volume, you could pass the command line parameter to load it
 
-    docker run -d -p 127.0.0.1:50052:50052 -v `pwd`/tika-config.xml:/tika-config.xml apache/tika-grpc:3.0.0-full -c /tika-config.xml
+    docker run -d -p 127.0.0.1:50052:50052 -v `pwd`/tika-config.xml:/tika-config.xml apache/tika-grpc:4.0.0-full -c /tika-config.xml
 
 You can see more configuration examples [here](https://tika.apache.org/2.5.0/configuring.html).
 
@@ -85,7 +85,7 @@ These files use docker-compose 3.x series and include:
 
 The Docker Compose files and configurations (sourced from _sample-configs_ directory) all have comments in them so you can try different options, or use them as a base to create your own custom configuration.
 
-**N.B.** You will want to create a environment variable (used in some bash scripts) matching the version of tika-docker you want to work with in the docker compositions e.g. `export TAG=3.0.0`. Similarly you should also consult `.env` which is used in the docker-compose `.yml` files.
+**N.B.** You will want to create a environment variable (used in some bash scripts) matching the version of tika-docker you want to work with in the docker compositions e.g. `export TAG=4.0.0`. Similarly you should also consult `.env` which is used in the docker-compose `.yml` files.
 
 You can install docker-compose from [here](https://docs.docker.com/compose/install/).
 
@@ -157,7 +157,7 @@ To meet up with others using Apache Tika, consider coming to one of the [Apache 
 
 For more information on the Apache Software Foundation, go to the [Apache Software Foundation](http://apache.org) website.
 
-For a full list of changes as of 3.0.0, visit [CHANGES.md](CHANGES.md).
+For a full list of changes as of 4.0.0, visit [CHANGES.md](CHANGES.md).
 
 For our current release process, visit [tika-docker Release Process](https://cwiki.apache.org/confluence/display/TIKA/Release+Process+for+tika-docker)
 
