@@ -57,6 +57,6 @@ RUN chown -R $UID_GID /var/cache/tika/plugins
 USER $UID_GID
 
 EXPOSE 50052
-ENTRYPOINT [ "/bin/sh", "-c", "exec java --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer --plugin-roots /var/cache/tika/plugins \"$@\"", "--"]
+ENTRYPOINT [ "/bin/sh", "-c", "echo '=== Plugin Directory Contents ===' && ls -lah /var/cache/tika/plugins/ && echo '=== Starting Tika gRPC Server ===' && exec java --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer --plugin-roots /var/cache/tika/plugins \"$@\"", "--"]
 
 LABEL maintainer="Apache Tika Developers dev@tika.apache.org"
