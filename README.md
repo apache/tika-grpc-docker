@@ -102,8 +102,8 @@ You can install docker-compose from [here](https://docs.docker.com/compose/insta
 # Build from a specific feature branch
 ./build-from-branch.sh -b TIKA-4578
 
-# Build with Ignite ConfigStore support
-./build-from-branch.sh -b main -i
+# Build from your local tika directory (for rapid development)
+./build-from-branch.sh -l /home/user/tika -t my-local-build
 ```
 
 This will:
@@ -169,17 +169,22 @@ Apache Tika Dev Team (dev@tika.apache.org)
 
 For testing unreleased features or development branches, you can build Docker images directly from source:
 
-### Building with Ignite ConfigStore Support
+### Build from Git Branch
 
 ```bash
-./build-from-branch.sh -b TIKA-4583-ignite-config-store -i -t ignite-test
+# Build from main branch
+./build-from-branch.sh -b main
+
+# Build from a specific feature branch  
+./build-from-branch.sh -b TIKA-4578
 ```
 
-This will:
-1. Clone the specified branch from the Apache Tika repository
-2. Build tika-grpc and tika-ignite-config-store
-3. Create a Docker image with both components
-4. Run basic tests to verify the image works
+### Build from Local Directory
+
+```bash
+# Build from your local tika checkout (for rapid development)
+./build-from-branch.sh -l /home/user/tika -t my-local-build
+```
 
 ### Build Script Options
 
@@ -189,20 +194,25 @@ This will:
 Options:
   -b BRANCH       Git branch or tag to build from (default: main)
   -r REPO         Git repository URL (default: https://github.com/apache/tika.git)
-  -t TAG          Docker image tag (default: branch-name)
-  -i              Include Ignite ConfigStore plugin
+  -l LOCAL_DIR    Build from local tika directory instead of cloning
+  -t TAG          Docker image tag (default: branch-name or 'local')
   -p              Push to Docker registry after building
-  -h              Display help message
+  -h              Display this help message
 ```
 
 ### Examples
 
-Build from a specific branch:
+Build from main branch:
 ```bash
-./build-from-branch.sh -b TIKA-4583-ignite-config-store -i
+./build-from-branch.sh -b main
 ```
 
-Build from a fork and push:
+Build from your local tika repository:
+```bash
+./build-from-branch.sh -l /home/user/source/tika -t my-test
+```
+
+Build from a fork and push to registry:
 ```bash
 ./build-from-branch.sh \
   -r https://github.com/yourusername/tika.git \
@@ -211,7 +221,7 @@ Build from a fork and push:
   -p
 ```
 
-See [sample-configs/ignite/README.md](sample-configs/ignite/README.md) for detailed instructions on running clustered deployments with Ignite.
+**Note:** Development builds compile from source and do NOT use GPG-signed releases. They are intended for development and testing only, not production use.
    
 ## Contributors
 
