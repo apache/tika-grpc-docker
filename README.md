@@ -222,6 +222,82 @@ Build from a fork and push to registry:
 ```
 
 **Note:** Development builds compile from source and do NOT use GPG-signed releases. They are intended for development and testing only, not production use.
+
+## Reproducible Builds
+
+The Apache Tika gRPC Docker project is designed to produce **reproducible builds**, ensuring transparency and security in the software supply chain.
+
+### What are Reproducible Builds?
+
+Reproducible builds are a set of software development practices that create a verifiable path from source code to binary. When a build is reproducible, anyone can verify that the resulting Docker image was built from the exact source code claimed, without any tampering.
+
+### How tika-grpc-docker Ensures Reproducibility
+
+**For Official Releases (Post Tika 4.0.0):**
+
+1. **GPG Signature Verification**
+   - Downloads release JARs from Apache distribution mirrors
+   - Verifies GPG signatures before using artifacts
+   - Uses Apache KEYS file for signature verification
+   - Build fails if signature verification fails
+
+2. **Multi-Stage Builds**
+   - Separate fetch and runtime stages
+   - Clear separation of build-time and runtime dependencies
+   - Minimal attack surface in final image
+
+3. **Declarative Configuration**
+   - All dependencies specified in Dockerfiles
+   - Fixed base images with version tags
+   - Explicit package versions where possible
+
+**For Development Builds:**
+
+1. **Git-based Source Control**
+   - Builds from specific Git commit SHA
+   - Git log included in build output for traceability
+   - Can reproduce build from any branch or commit
+
+2. **Version Pinning**
+   - Maven version specified in builder image
+   - JRE version specified as build argument
+   - Base OS version (Ubuntu) specified
+
+3. **Build Transparency**
+   - Multi-stage Dockerfile shows all build steps
+   - No hidden build processes
+   - All dependencies fetched during Docker build (visible in logs)
+
+### Verifying a Build
+
+To verify that an image was built from a specific source:
+
+**For release builds:**
+```bash
+# The build process logs the GPG verification:
+docker build --build-arg TIKA_VERSION=4.0.0 -f full/Dockerfile .
+
+# Look for output like:
+# gpg: Signature made ...
+# gpg: Good signature from "Tim Allison (ASF signing key) <tallison@apache.org>"
+```
+
+**For development builds:**
+```bash
+# The build logs the exact Git commit:
+./build-from-branch.sh -b TIKA-4578
+
+# Look for output showing the Git commit SHA and message
+```
+
+### Benefits
+
+- **Security**: Verify that binaries match the audited source code
+- **Trust**: Anyone can independently verify the build process
+- **Compliance**: Meets security audit requirements for critical deployments
+- **Debugging**: Trace issues back to exact source code version
+
+For more information on reproducible builds, visit [reproducible-builds.org](https://reproducible-builds.org/).
    
 ## Contributors
 
