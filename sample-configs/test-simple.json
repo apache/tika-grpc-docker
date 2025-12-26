@@ -1,19 +1,20 @@
 {
+  "plugin-roots": ["/tmp/tika-plugins"],
   "fetchers": [
     {
-      "id": "fs",
-      "name": "file-system",
-      "params": {
-        "basePath": "/data/input"
+      "fs": {
+        "defaultFetcher": {
+          "basePath": "/data/input"
+        }
       }
     }
   ],
   "emitters": [
     {
-      "id": "fs",
-      "name": "file-system",
-      "params": {
-        "basePath": "/data/output"
+      "fs": {
+        "defaultEmitter": {
+          "basePath": "/data/output"
+        }
       }
     }
   ]

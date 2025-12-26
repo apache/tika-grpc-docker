@@ -46,9 +46,14 @@ RUN set -eux \
 # Copy the pre-built JAR from the build context
 COPY tika-grpc.jar /tika-grpc.jar
 
+# Copy plugins to read-only location
+COPY plugins/*.zip /opt/tika-plugins/
+
+# Create writable plugin directory and copy zips there at runtime
+# This is done in the entrypoint to support read-only root filesystems
 USER $UID_GID
 
 EXPOSE 50052
-ENTRYPOINT [ "/bin/sh", "-c", "exec java -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer \"$@\"", "--"]
+ENTRYPOINT [ "/bin/sh", "-c", "mkdir -p /tmp/tika-plugins && cp /opt/tika-plugins/*.zip /tmp/tika-plugins/ && exec java -Dtika.plugin.dir=/tmp/tika-plugins -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer \"$@\"", "--"]
 
 LABEL maintainer="Apache Tika Developers dev@tika.apache.org"

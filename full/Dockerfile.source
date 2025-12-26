@@ -33,9 +33,10 @@ RUN apt-get update && apt-get install -y git && \
 WORKDIR /build/tika
 RUN mvn clean install -DskipTests -pl tika-grpc -am
 
-# Extract the built JAR
-RUN mkdir -p /artifacts && \
-    cp tika-grpc/target/tika-grpc-*.jar /artifacts/tika-grpc.jar
+# Extract the built JAR and plugins
+RUN mkdir -p /artifacts/plugins && \
+    cp tika-grpc/target/tika-grpc-*.jar /artifacts/tika-grpc.jar && \
+    find tika-pipes/tika-pipes-plugins -name "*.zip" -not -path "*/target/archive-tmp/*" -exec cp {} /artifacts/plugins/ \;
 
 # Stage 2: Runtime image with full dependencies
 FROM ubuntu:noble AS runtime
@@ -69,9 +70,13 @@ RUN set -eux \
 # Copy the built JAR from builder stage
 COPY --from=builder /artifacts/tika-grpc.jar /tika-grpc.jar
 
+# Copy plugins to read-only location
+COPY --from=builder /artifacts/plugins/*.zip /opt/tika-plugins/
+
+# Create writable plugin directory and copy zips there at runtime
 USER $UID_GID
 
 EXPOSE 50052
-ENTRYPOINT [ "/bin/sh", "-c", "exec java -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer \"$@\"", "--"]
+ENTRYPOINT [ "/bin/sh", "-c", "mkdir -p /tmp/tika-plugins && cp /opt/tika-plugins/*.zip /tmp/tika-plugins/ && exec java -Dtika.plugin.dir=/tmp/tika-plugins -cp \"/tika-grpc.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer \"$@\"", "--"]
 
 LABEL maintainer="Apache Tika Developers dev@tika.apache.org"
