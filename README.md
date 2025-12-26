@@ -133,7 +133,7 @@ See the "Building from Development Branches" section below for complete document
 ```
 
 This will:
-1. Download the signed `tika-server-grpc-4.0.0.jar` from Apache distribution mirrors
+1. Download the signed `tika-grpc-4.0.0.jar` from Apache distribution mirrors
 2. Download and verify the GPG signature (`.asc` file)
 3. Import Apache KEYS and verify the JAR is properly signed
 4. Build both minimal and full Docker images
@@ -145,7 +145,7 @@ docker build -t apache/tika-grpc:4.0.0 --build-arg TIKA_VERSION=4.0.0 - < minima
 docker build -t apache/tika-grpc:4.0.0-full --build-arg TIKA_VERSION=4.0.0 - < full/Dockerfile
 ```
 
-> **Note:** The `minimal/` and `full/` Dockerfiles are prepared for future releases and will NOT work until tika-server-grpc-4.0.0.jar is published to Apache distribution mirrors.
+> **Note:** The `minimal/` and `full/` Dockerfiles are prepared for future releases and will NOT work until tika-grpc-4.0.0.jar is published to Apache distribution mirrors.
     
 ## More Information
 
@@ -240,7 +240,7 @@ There have been a range of [contributors](https://github.com/apache/tika-grpc-do
 
 Official release images are built using GPG-signed Apache release artifacts. The Dockerfiles in this repository:
 
-1. Download the `tika-server-grpc-${VERSION}.jar` from Apache distribution mirrors
+1. Download the `tika-grpc-${VERSION}.jar` from Apache distribution mirrors
 2. Download the corresponding `.asc` GPG signature file
 3. Import the Apache Tika KEYS file
 4. Verify the GPG signature before using the JAR in the Docker image

@@ -14,7 +14,7 @@
 
 # ============================================================================
 # NOTE: This Dockerfile requires an official Apache Tika release with
-#       tika-server-grpc JAR published to Apache distribution mirrors.
+#       tika-grpc JAR published to Apache distribution mirrors.
 #       
 #       tika-server-grpc will first be available in Tika 4.0.0.
 #       
@@ -32,25 +32,25 @@ FROM base as fetch_tika
 ARG TIKA_VERSION
 ARG CHECK_SIG=true
 
-ENV NEAREST_TIKA_SERVER_URL="https://dlcdn.apache.org/tika/${TIKA_VERSION}/tika-server-grpc-${TIKA_VERSION}.jar" \
-    ARCHIVE_TIKA_SERVER_URL="https://archive.apache.org/dist/tika/${TIKA_VERSION}/tika-server-grpc-${TIKA_VERSION}.jar" \
-    BACKUP_TIKA_SERVER_URL="https://downloads.apache.org/tika/${TIKA_VERSION}/tika-server-grpc-${TIKA_VERSION}.jar" \
-    DEFAULT_TIKA_SERVER_ASC_URL="https://downloads.apache.org/tika/${TIKA_VERSION}/tika-server-grpc-${TIKA_VERSION}.jar.asc" \
-    ARCHIVE_TIKA_SERVER_ASC_URL="https://archive.apache.org/dist/tika/${TIKA_VERSION}/tika-server-grpc-${TIKA_VERSION}.jar.asc" \
+ENV NEAREST_TIKA_SERVER_URL="https://dlcdn.apache.org/tika/${TIKA_VERSION}/tika-grpc-${TIKA_VERSION}.jar" \
+    ARCHIVE_TIKA_SERVER_URL="https://archive.apache.org/dist/tika/${TIKA_VERSION}/tika-grpc-${TIKA_VERSION}.jar" \
+    BACKUP_TIKA_SERVER_URL="https://downloads.apache.org/tika/${TIKA_VERSION}/tika-grpc-${TIKA_VERSION}.jar" \
+    DEFAULT_TIKA_SERVER_ASC_URL="https://downloads.apache.org/tika/${TIKA_VERSION}/tika-grpc-${TIKA_VERSION}.jar.asc" \
+    ARCHIVE_TIKA_SERVER_ASC_URL="https://archive.apache.org/dist/tika/${TIKA_VERSION}/tika-grpc-${TIKA_VERSION}.jar.asc" \
     TIKA_VERSION=$TIKA_VERSION
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get -y install gnupg2 wget ca-certificates \
     && wget -t 10 --max-redirect 1 --retry-connrefused -qO- https://downloads.apache.org/tika/KEYS | gpg --import \
-    && wget -t 10 --max-redirect 1 --retry-connrefused $NEAREST_TIKA_SERVER_URL -O /tika-server-grpc-${TIKA_VERSION}.jar || rm /tika-server-grpc-${TIKA_VERSION}.jar \
-    && sh -c "[ -f /tika-server-grpc-${TIKA_VERSION}.jar ]" || wget $ARCHIVE_TIKA_SERVER_URL -O /tika-server-grpc-${TIKA_VERSION}.jar || rm /tika-server-grpc-${TIKA_VERSION}.jar \
-    && sh -c "[ -f /tika-server-grpc-${TIKA_VERSION}.jar ]" || wget $BACKUP_TIKA_SERVER_URL -O /tika-server-grpc-${TIKA_VERSION}.jar || rm /tika-server-grpc-${TIKA_VERSION}.jar \
-    && sh -c "[ -f /tika-server-grpc-${TIKA_VERSION}.jar ]" || exit 1 \
-    && wget -t 10 --max-redirect 1 --retry-connrefused $DEFAULT_TIKA_SERVER_ASC_URL -O /tika-server-grpc-${TIKA_VERSION}.jar.asc  || rm /tika-server-grpc-${TIKA_VERSION}.jar.asc \
-    && sh -c "[ -f /tika-server-grpc-${TIKA_VERSION}.jar.asc ]" || wget $ARCHIVE_TIKA_SERVER_ASC_URL -O /tika-server-grpc-${TIKA_VERSION}.jar.asc || rm /tika-server-grpc-${TIKA_VERSION}.jar.asc \
-    && sh -c "[ -f /tika-server-grpc-${TIKA_VERSION}.jar.asc ]" || exit 1 \
-    && gpg --verify /tika-server-grpc-${TIKA_VERSION}.jar.asc /tika-server-grpc-${TIKA_VERSION}.jar
+    && wget -t 10 --max-redirect 1 --retry-connrefused $NEAREST_TIKA_SERVER_URL -O /tika-grpc-${TIKA_VERSION}.jar || rm /tika-grpc-${TIKA_VERSION}.jar \
+    && sh -c "[ -f /tika-grpc-${TIKA_VERSION}.jar ]" || wget $ARCHIVE_TIKA_SERVER_URL -O /tika-grpc-${TIKA_VERSION}.jar || rm /tika-grpc-${TIKA_VERSION}.jar \
+    && sh -c "[ -f /tika-grpc-${TIKA_VERSION}.jar ]" || wget $BACKUP_TIKA_SERVER_URL -O /tika-grpc-${TIKA_VERSION}.jar || rm /tika-grpc-${TIKA_VERSION}.jar \
+    && sh -c "[ -f /tika-grpc-${TIKA_VERSION}.jar ]" || exit 1 \
+    && wget -t 10 --max-redirect 1 --retry-connrefused $DEFAULT_TIKA_SERVER_ASC_URL -O /tika-grpc-${TIKA_VERSION}.jar.asc  || rm /tika-grpc-${TIKA_VERSION}.jar.asc \
+    && sh -c "[ -f /tika-grpc-${TIKA_VERSION}.jar.asc ]" || wget $ARCHIVE_TIKA_SERVER_ASC_URL -O /tika-grpc-${TIKA_VERSION}.jar.asc || rm /tika-grpc-${TIKA_VERSION}.jar.asc \
+    && sh -c "[ -f /tika-grpc-${TIKA_VERSION}.jar.asc ]" || exit 1 \
+    && gpg --verify /tika-grpc-${TIKA_VERSION}.jar.asc /tika-grpc-${TIKA_VERSION}.jar
 
-#RUN if [ "$CHECK_SIG" = "true" ] ; then gpg --verify /tika-server-grpc-${TIKA_VERSION}.jar.asc /tika-server-grpc-${TIKA_VERSION}.jar; fi
+#RUN if [ "$CHECK_SIG" = "true" ] ; then gpg --verify /tika-grpc-${TIKA_VERSION}.jar.asc /tika-grpc-${TIKA_VERSION}.jar; fi
 
 FROM base as runtime
 ARG UID_GID
@@ -80,11 +80,11 @@ RUN set -eux \
 ARG TIKA_VERSION
 ENV TIKA_VERSION=$TIKA_VERSION
 
-COPY --from=fetch_tika /tika-server-grpc-${TIKA_VERSION}.jar /tika-server-grpc-${TIKA_VERSION}.jar
+COPY --from=fetch_tika /tika-grpc-${TIKA_VERSION}.jar /tika-grpc-${TIKA_VERSION}.jar
 USER $UID_GID
 
 EXPOSE 50052
-ENTRYPOINT [ "/bin/sh", "-c", "exec java -cp \"/tika-server-grpc-${TIKA_VERSION}.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer \"$@\"", "--"]
+ENTRYPOINT [ "/bin/sh", "-c", "exec java -cp \"/tika-grpc-${TIKA_VERSION}.jar:/tika-extras/*\" org.apache.tika.pipes.grpc.TikaGrpcServer \"$@\"", "--"]
 
 LABEL maintainer="Apache Tika Developers dev@tika.apache.org"
 
