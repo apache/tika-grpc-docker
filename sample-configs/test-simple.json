@@ -1,0 +1,20 @@
+{
+  "fetchers": [
+    {
+      "id": "fs",
+      "name": "file-system",
+      "params": {
+        "basePath": "/data/input"
+      }
+    }
+  ],
+  "emitters": [
+    {
+      "id": "fs",
+      "name": "file-system",
+      "params": {
+        "basePath": "/data/output"
+      }
+    }
+  ]
+}
