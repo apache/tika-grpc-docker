@@ -1,5 +1,4 @@
 {
-  "plugin-roots": ["/tmp/tika-plugins"],
   "fetchers": [
     {
       "fs": {
