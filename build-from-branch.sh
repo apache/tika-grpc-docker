@@ -143,7 +143,7 @@ fi
 echo ""
 echo "Building Docker image..."
 if [ -n "$LOCAL_DIR" ]; then
-  # Build from local directory - copy JAR to build context
+  # Build from local directory - copy JAR and plugins to build context
   LOCAL_JAR=$(find "$LOCAL_DIR/tika-grpc/target" -name "tika-grpc-*.jar" -not -name "*-tests.jar" -not -name "*-sources.jar" -not -name "*-javadoc.jar" | head -1)
   if [ -z "$LOCAL_JAR" ]; then
     die "Error: tika-grpc JAR not found in $LOCAL_DIR/tika-grpc/target/. Did you run 'mvn clean install' in the tika directory?"
@@ -153,6 +153,18 @@ if [ -n "$LOCAL_DIR" ]; then
   # Copy JAR to build context temporarily
   cp "$LOCAL_JAR" ./tika-grpc.jar || die "Failed to copy JAR"
   
+  # Copy plugins to build context
+  mkdir -p ./plugins
+  PLUGIN_DIR="$LOCAL_DIR/tika-pipes/tika-pipes-plugins"
+  if [ -d "$PLUGIN_DIR" ]; then
+    echo "Copying plugins from $PLUGIN_DIR"
+    find "$PLUGIN_DIR" -name "*.zip" -not -path "*/target/archive-tmp/*" -exec cp {} ./plugins/ \;
+    PLUGIN_COUNT=$(ls -1 ./plugins/*.zip 2>/dev/null | wc -l)
+    echo "Copied $PLUGIN_COUNT plugin(s)"
+  else
+    echo "Warning: Plugin directory not found at $PLUGIN_DIR"
+  fi
+  
   docker build \
     -t "apache/tika-grpc:$TAG" \
     -f "$DOCKERFILE" \
@@ -160,6 +172,7 @@ if [ -n "$LOCAL_DIR" ]; then
   
   # Clean up
   rm -f ./tika-grpc.jar
+  rm -rf ./plugins
 else
   # Build from Git repository
   docker build \
@@ -232,5 +245,5 @@ echo "Done! Image ready: apache/tika-grpc:$TAG"
 echo "====================================================================================================="
 echo ""
 echo "To run the container:"
-echo "  docker run -p 50052:50052 -v \$(pwd)/tika-config.xml:/config/tika-config.xml apache/tika-grpc:$TAG -c /config/tika-config.xml"
+echo "  docker run -p 50052:50052 -v \$(pwd)/tika-config.json:/config/tika-config.json apache/tika-grpc:$TAG -c /config/tika-config.json"
 echo ""
